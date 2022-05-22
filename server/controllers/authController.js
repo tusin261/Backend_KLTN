@@ -42,7 +42,7 @@ module.exports.register = async (req, res) => {
                 <h3 style="text-align: center;">XÁC THỰC EMAIL</h3>
                 <p>Xin chào,<b>${name}</b></p>
                 <p>Cảm ơn bạn đã sử dụng zChat, vui lòng nhấn vào link bên dưới để xác thực tài khoản.</p>
-                <a style="text-decoration:none" href="http://localhost:3000/confirm-email/${userId}">Xác thực</a>
+                <a style="text-decoration:none" href="https://chic-chaja-7ac399.netlify.app/confirm-email/${userId}">Xác thực</a>
                 </br></br>
                 <p>Cám ơn</p>.
                 </div>

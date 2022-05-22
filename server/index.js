@@ -38,7 +38,7 @@ const server = app.listen(PORT, () => {
 const io = require('socket.io')(server, {
     pingTimeout:1200000,
     cors: {
-        origin: "http://localhost:3000",
+        origin: "https://chic-chaja-7ac399.netlify.app",
     }
 });
 let users = [];
