@@ -192,6 +192,7 @@ io.on('connection', (socket) => {
     // })
     socket.on("disconnect", () => {
         console.log("a user disconnected!");
+        const a = '123';
         removeUser(socket.id);
         io.emit("getUsers", users);
       });
