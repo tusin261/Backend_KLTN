@@ -34,11 +34,11 @@ mongoose.connect(process.env.MONGO_URL)
 const server = app.listen(PORT, () => {
     console.log('Server is running ...',);
 });
-//sau 20p k hoat dong thi dong ket noi
+//sau 60s k hoat dong thi dong ket noi
 const io = require('socket.io')(server, {
     pingTimeout:1200000,
     cors: {
-        origin: "https://chic-chaja-7ac399.netlify.app",
+        origin: "http://localhost:3000",
     }
 });
 let users = [];
@@ -118,7 +118,9 @@ io.on('connection', (socket) => {
                 socket.to(newListReceiveOnlineNoSender[i].socketId).emit("new message group",data);
             }
         }
-    })
+    });
+
+
     socket.on('create group',(data)=>{
         const listReceive = data.member;
         const newListReceiveOnline = users.filter(o1 => listReceive.some(o2 => o1.userId === o2._id));
@@ -126,7 +128,41 @@ io.on('connection', (socket) => {
         for(let i=0;i<newListReceiveOnlineNoSender.length;i++){
             socket.to(newListReceiveOnlineNoSender[i].socketId).emit("notification new group",data);
         }
-    })
+    });
+    //send notification kick member
+    socket.on('send notification kick member',({memId,group})=>{
+        const memberOnline = users.find((e)=>e.userId == memId);
+        if(memberOnline){
+            socket.to(getUser(memId).socketId).emit("notification kick member",{memId,group});
+        }
+        const listReceive = group.member;
+        const newListReceiveOnline = users.filter(o1 => listReceive.some(o2 => o1.userId === o2._id));
+        const newListReceiveOnlineNoSender = newListReceiveOnline.filter(i=>i.userId !== group.creator._id );
+        for(let i=0;i<newListReceiveOnlineNoSender.length;i++){
+            socket.to(newListReceiveOnlineNoSender[i].socketId).emit("notification update group",group);
+        }
+    });
+
+    //send notification add member to group
+    socket.on('send notification add member to group',({group})=>{
+        const listReceive = group.member;
+        const newListReceiveOnline = users.filter(o1 => listReceive.some(o2 => o1.userId === o2._id));
+        const newListReceiveOnlineNoSender = newListReceiveOnline.filter(i=>i.userId !== group.creator._id );
+        for(let i=0;i<newListReceiveOnlineNoSender.length;i++){
+            socket.to(newListReceiveOnlineNoSender[i].socketId).emit("notification update group",group);
+        }
+    });
+
+    //send notification member out group
+    socket.on('send notification member out group',({group})=>{
+        const listReceive = group.member;
+        const newListReceiveOnline = users.filter(o1 => listReceive.some(o2 => o1.userId === o2._id));
+        const newListReceiveOnlineNoSender = newListReceiveOnline.filter(i=>i.userId !== group.creator._id );
+        for(let i=0;i<newListReceiveOnlineNoSender.length;i++){
+            socket.to(newListReceiveOnlineNoSender[i].socketId).emit("notification update group",group);
+        }
+    });
+
     socket.on('add friend',({receiverId,data})=>{
         const isOnline = users.find((e)=>e.userId == receiverId);
         if(isOnline){
@@ -141,7 +177,6 @@ io.on('connection', (socket) => {
     });
     socket.on('like',({ receiverId, data })=>{
         const isOnline = users.find((e)=>e.userId == receiverId);
-        console.log(data);
         if(isOnline){
             socket.to(getUser(receiverId).socketId).emit("new noti like",data);
         }
